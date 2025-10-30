@@ -1,0 +1,94 @@
+---
+
+#
+# JSON Schema definition for `reportportal` report plugin
+#
+# https://tmt.readthedocs.io/en/stable/spec/plans.html#reportportal
+#
+
+$id: /schemas/report/reportportal
+$schema: https://json-schema.org/draft-07/schema
+
+type: object
+additionalProperties: false
+
+properties:
+
+  how:
+    type: string
+    enum:
+      - reportportal
+
+  name:
+    type: string
+
+  url:
+    type: string
+
+  token:
+    type: string
+
+  project:
+    type: string
+
+  launch:
+    type: string
+
+  launch-description:
+    type: string
+
+  launch-per-plan:
+    type: boolean
+
+  suite-per-plan:
+    type: boolean
+
+  upload-to-launch:
+    type: string
+
+  upload-to-suite:
+    type: string
+
+  launch-rerun:
+    type: boolean
+
+  defect-type:
+    type: string
+
+  exclude-variables:
+    type: string
+
+  artifacts-url:
+    type: string
+
+  api-version:
+    type: string
+
+  log-size-limit:
+    anyOf:
+      - type: string
+      - type: integer
+
+  traceback-size-limit:
+    anyOf:
+      - type: string
+      - type: integer
+
+  ssl-verify:
+    type: boolean
+
+  upload-subresults:
+    type: boolean
+
+  link-template:
+    type: string
+
+  upload-log-pattern:
+    $ref: "/schemas/common#/definitions/one_or_more_strings"
+
+  when:
+    $ref: "/schemas/common#/definitions/when"
+
+required:
+  - how
+  - project

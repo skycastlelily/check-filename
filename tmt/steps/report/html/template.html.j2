@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test results of {{ plan.name }}</title>
+    <style>
+        body {
+            background: #eee;
+            padding: 3em;
+            font-family: sans-serif;
+            text-align: center;
+        }
+
+        div {
+            display: inline-block;
+            text-align: left;
+            background: white;
+            padding: 2em;
+            border-radius: 1ex;
+        }
+
+        a {
+            color: #29f;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            color: #aaa;
+            margin: 0ex 0ex 1ex 7px;
+        }
+
+        h2 {
+            color: #555;
+            margin: -1ex 0ex 1ex 7px;
+        }
+
+        p.header {
+            margin: 30px 7px 10px 7px;
+        }
+
+        p.footer {
+            margin: 30px 7px 0px 7px;
+        }
+
+        #results table.check,
+        #results table.subresult-check,
+        #results table.subresult {
+            width: 100%;
+            background: #dadada;
+        }
+
+        #results, #filters {
+            border-spacing: 7px;
+        }
+
+        #results td, #results th {
+            padding: 0.7ex 1em;
+        }
+
+        #results td {
+            background: #f8f8f8;
+            border-radius: 0.5ex;
+        }
+
+        #results td.result {
+            text-align: center;
+            text-shadow: 0px 0px 5px #555;
+            color: white;
+            width: 7ex;
+        }
+
+        #results td.pass {
+            background: #0a0;
+        }
+        #results td.fail {
+            background: #d30;
+        }
+        #results td.info {
+            background: #58d;
+        }
+        #results td.warn {
+            background: #fc5;
+        }
+        #results td.error {
+            background: #b4d;
+        }
+        #results td.skip {
+            background: #808080;
+        }
+
+        #results td.log {
+            word-spacing: 1ex;
+        }
+
+        #results td.note {
+            color: #c00;
+        }
+
+        #results tr.check,
+        /* #results tr.subresult-check, // Do not hide subresult checks by default */
+        #results tr.subresult {
+            font-size: 90%;
+            display: none;
+        }
+
+        #results tr.check td.result,
+        #results tr.subresult-check td.result,
+        #results tr.subresult td.result {
+            width: 5ex;
+        }
+
+        #results tr.check td.name,
+        #results tr.subresult-check td.name,
+        #results tr.subresult td.name {
+            color: #888;
+            padding-left: 5ex;
+            width: 22ex;
+        }
+
+        #results ul {
+            margin: 0px;
+            padding-inline-start: 16px;
+        }
+
+        .context-dimension {
+            display: inline-block;
+            text-align: center;
+            vertical-align: baseline;
+            white-space: nowrap;
+            border-radius: 0.5ex;
+            padding: 0.4ex 1ex;
+            background: #eee;
+            font-family: ui-monospace,monospace;
+            font-size: 90%;
+        }
+
+    </style>
+    <script>
+        var filter_values = {
+            "pass": true,
+            "fail": true,
+            "info": true,
+            "warn": true,
+            "error": true,
+            "skip": true,
+            "name": "",
+            "note": "",
+        };
+
+        // should a row be shown?
+        function valid_row(row) {
+            // checkboxes
+            const result = row.getElementsByClassName("result")[0].textContent;
+            if (!filter_values[result])
+                return false;
+            // name
+            const name = row.getElementsByClassName("name")[0].textContent;
+            if (filter_values["name"] && !name.match(filter_values["name"]))
+                return false;
+            // note (if it doesn't exist, treat it as empty)
+            let note = "";
+            const note_elem = row.getElementsByClassName("note")[0];
+            if (note_elem)
+                note = note_elem.textContent;
+            if (filter_values["note"] && !note.match(filter_values["note"]))
+                return false;
+            return true;
+        }
+
+        // show or hide results table rows
+        function update_rows() {
+            const rows = document.getElementById("results").rows;
+            for (let i = 1; i < rows.length; i++) {
+                if (valid_row(rows[i]))
+                    rows[i].style.removeProperty("display");
+                else
+                    rows[i].style.display = "none";
+            }
+        }
+
+        function filter_checkbox(e) {
+            const type = e.id.replace("filter_", "");
+            filter_values[type] = e.checked;
+            update_rows();
+        }
+        function filter_name(e) {
+            filter_values["name"] = e.value;
+            update_rows();
+        }
+        function filter_note(e) {
+            filter_values["note"] = e.value;
+            update_rows();
+        }
+
+        // toggle the visibility of a given table row
+        function toggle_row_visibility(button, e) {
+            const element = document.getElementById(e);
+            if (element.style.display === 'none' || element.style.display === '') {
+                element.style.display = 'table-row';
+                button.textContent = button.textContent.replace('+', '-');
+            } else {
+                element.style.display = 'none';
+                button.textContent = button.textContent.replace('-', '+');
+            }
+        }
+    </script>
+</head>
+
+{% macro emit_guest(guest) %}
+{% if display_guest %}
+  {% if guest %}
+    {% if guest.role %}
+      {{ guest.name }} ({{ guest.role }})
+    {% else %}
+      {{ guest.name }}
+    {% endif %}
+  {% endif %}
+{% endif %}
+{% endmacro %}
+
+<body>
+<div>
+<h1>{{ plan.name }}</h1>
+{% if plan.summary %}<h2>{{ plan.summary }}</h2>{% endif %}
+
+{% if plan.fmf_context %}
+<p class="header">
+Context:
+{% for key, values in plan.fmf_context.items() %}
+<span class="context-dimension">{{ key }} = {{ values | join(", ") }}</span>
+{% endfor %}
+</p>
+{% endif %}
+
+{% if results %}
+<table id="filters">
+    <tr>
+        <td><label><input type="checkbox" id="filter_pass" onclick="filter_checkbox(this);" checked>pass</label></td>
+        <td><label><input type="checkbox" id="filter_fail" onclick="filter_checkbox(this);" checked>fail</label></td>
+        <td><label><input type="checkbox" id="filter_info" onclick="filter_checkbox(this);" checked>info</label></td>
+        <td><label><input type="checkbox" id="filter_warn" onclick="filter_checkbox(this);" checked>warn</label></td>
+        <td><label><input type="checkbox" id="filter_error" onclick="filter_checkbox(this);" checked>error</label></td>
+        <td><label><input type="checkbox" id="filter_skip" onclick="filter_checkbox(this);" checked>skip</label></td>
+        <td><input type="search" placeholder="Filter test names" onchange="filter_name(this);"/></td>
+        <td><input type="search" placeholder="Filter note" onchange="filter_note(this);"/></td>
+    </tr>
+</table>
+
+<table id="results">
+    <thead>
+        <tr>
+            <th>Result</th>
+            <th>Test</th>
+            {% if display_guest %}
+            <th>Guest</th>
+            {% endif %}
+            <th>Logs</th>
+            <th>Data</th>
+            <th>Note</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    {% for result in results %}
+    <tr class="result">
+        <td class="result {{ result.result.value | e }}">{{ result.result.value | e }}</td>
+        <td class="name">{{ result.name | e }}</td>
+{% if display_guest %}
+        <td class="guest">{{ emit_guest(result.guest) | trim | e }}</td>
+{% endif %}
+        <td class="log">
+        {% for log in result.log %}
+            <a href="{{ base_dir | linkable_path | urlencode }}/{{ log | urlencode }}">{{ log | basename }}</a>
+        {% endfor %}
+        </td>
+        <td class="data"><a href="{{ base_dir | linkable_path | urlencode }}/{{ result.data_path | urlencode }}">data</a></td>
+        <td class="note">
+          {% if result.note %}
+            <ul>
+              {% for note in result.note %}
+                <li class="note">{{ note | e }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            -
+          {% endif %}
+        </td>
+        <td class="action">
+            {% if result.check %}
+            <button onclick="toggle_row_visibility(this, 'check-{{ loop.index }}')" title="Show / hide checks">checks&nbsp;[+]</button>
+            {% endif %}
+            {% if result.subresult %}
+            <button onclick="toggle_row_visibility(this, 'subresult-{{ loop.index }}')" title="Show / hide subresults">subresults&nbsp;[+]</button>
+            {% endif %}
+        </td>
+    </tr>
+    {% if result.check %}
+    <tr class="check" id="check-{{ loop.index }}">
+        <td colspan="{% if display_guest %}7{% else %}6{% endif %}">
+            <h3>Checks</h3>
+            <table class="check">
+                <thead>
+                    <tr>
+                        <th>Result</th>
+                        <th>Name</th>
+                        <th>Logs</th>
+                    </tr>
+                </thead>
+                {% for check in result.check %}
+                <tr>
+                    <td class="result {{ check.result.value | e }}">{{ check.result.value | e }}</td>
+                    <td class="name">{{ check.name | e }} ({{ check.event.value }})</td>
+                    <td class="log">
+                        {% for log in check.log %}
+                        <a href="{{ base_dir | linkable_path | urlencode }}/{{ log | urlencode }}">{{ log | basename }}</a>
+                        {% else %}
+                        -
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </td>
+    </tr>
+    {% endif %}
+    {% if result.subresult %}
+    <tr class="subresult" id="subresult-{{ loop.index }}">
+        <td colspan="{% if display_guest %}7{% else %}6{% endif %}">
+            <h3>Subresults</h3>
+            <table class="subresult">
+                <thead>
+                    <tr>
+                        <th>Result</th>
+                        <th>Name</th>
+                        <th>Logs</th>
+                    </tr>
+                </thead>
+                {% for subresult in result.subresult %}
+                <tr>
+                    <td class="result {{ subresult.result.value | e }}">{{ subresult.result.value | e }}</td>
+                    <td class="name">{{ subresult.name | e }}</td>
+                    <td class="log">
+                        {% for log in subresult.log %}
+                        <a href="{{ base_dir | linkable_path | urlencode }}/{{ log | urlencode }}">{{ log | basename }}</a>
+                        {% else %}
+                        -
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% if subresult.check %}
+                <tr class="subresult-check" id="subresult-check-{{ loop.index }}">
+                    <td colspan="3">
+                        <h3>Subresult checks</h3>
+                        <table class="check">
+                            <thead>
+                                <tr>
+                                    <th>Result</th>
+                                    <th>Name</th>
+                                    <th>Logs</th>
+                                </tr>
+                            </thead>
+                            {% for check in subresult.check %}
+                            <tr>
+                                <td class="result {{ check.result.value | e }}">{{ check.result.value | e }}</td>
+                                <td class="name">{{ check.name | e }} ({{ check.event.value }})</td>
+                                <td class="log">
+                                    {% for log in check.log %}
+                                    <a href="{{ base_dir | linkable_path | urlencode }}/{{ log | urlencode }}">{{ log | basename }}</a>
+                                    {% else %}
+                                    -
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </table>
+        </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+{% else %}
+<b>No test results found.</b>
+{% endif %}
+<p class="footer">
+    Links: <a href="{{ plan.run_workdir | linkable_path | urlencode }}/log.txt">full debug log</a>
+</p>
+</div>
+</body>
+</html>

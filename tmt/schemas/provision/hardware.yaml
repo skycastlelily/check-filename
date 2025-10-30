@@ -1,0 +1,533 @@
+---
+
+#
+# JSON Schema definition for hardware specification
+#
+# https://tmt.readthedocs.io/en/stable/spec/plans.html#hardware
+#
+
+$id: /schemas/provision/hardware
+$schema: http://json-schema.org/draft-07/schema
+
+definitions:
+  # HW requirements: `arch`
+  # NOTE: not yet supported in hardware
+  # arch:
+  #   type: string
+
+  # HW requirements shared by device-like objects
+  _device_name:
+    type: string
+
+  _device_id:
+    anyOf:
+      - type: string
+      - type: integer
+
+  _device_driver:
+    type: string
+
+  _device_vendor_name:
+    type: string
+
+  _device_vendor_id:
+    anyOf:
+      - type: string
+      - type: integer
+
+  # TODO: currently unused because validation from fmf does not allow
+  # newer validator than Draft4
+  _device:
+    type: object
+
+    properties:
+      device-name:
+        "$ref": "#/definitions/_device_name"
+
+      device:
+        "$ref": "#/definitions/_device_id"
+
+      driver:
+        "$ref": "#/definitions/_device_driver"
+
+      vendor-name:
+        "$ref": "#/definitions/_device_vendor_name"
+
+      vendor:
+        "$ref": "#/definitions/_device_vendor_id"
+
+  # HW requirements: single `beaker` item
+  beaker:
+    type: object
+
+    properties:
+      pool:
+        type: string
+      panic-watchdog:
+        type: boolean
+
+    additionalProperties: false
+
+    # enforce at least one property
+    minProperties: 1
+
+  # HW requirements: `boot` block
+  boot:
+    type: object
+
+    properties:
+      method:
+        type: string
+
+    additionalProperties: false
+
+    # enforce at least one property - we don't care which one, but we don't want
+    # empty `boot`.
+    minProperties: 1
+
+  # HW requirements: `compatible` block
+  compatible:
+    type: object
+
+    properties:
+      distro:
+        type: array
+        items:
+          type: string
+
+    additionalProperties: false
+    minProperties: 1
+
+  # HW requirements: `cpu` block
+  cpu:
+    type: object
+
+    properties:
+      sockets:
+        anyOf:
+          - type: string
+          - type: integer
+      cores:
+        anyOf:
+          - type: string
+          - type: integer
+      threads:
+        anyOf:
+          - type: string
+          - type: integer
+      cores-per-socket:
+        anyOf:
+          - type: string
+          - type: integer
+      threads-per-core:
+        anyOf:
+          - type: string
+          - type: integer
+      processors:
+        anyOf:
+          - type: string
+          - type: integer
+      family:
+        anyOf:
+          - type: string
+          - type: integer
+      family-name:
+        type: string
+      model:
+        anyOf:
+          - type: string
+          - type: integer
+      model-name:
+        type: string
+      frequency:
+        anyOf:
+          - type: string
+          - type: number
+      stepping:
+        anyOf:
+          - type: string
+          - type: integer
+      flag:
+        type: array
+        items:
+          type: string
+      vendor-name:
+        "$ref": "#/definitions/_device_vendor_name"
+      vendor:
+        "$ref": "#/definitions/_device_vendor_id"
+      hyper-threading:
+        type: boolean
+
+    additionalProperties: false
+
+    # enforce at least one property - we don't care which one, but we don't want
+    # empty `cpu`.
+    minProperties: 1
+
+  # HW requirements: single `device` item
+  device:
+    type: object
+
+    properties:
+      # TODO: copied from #/definitions/_device till the validator maturity gets resolved.
+      # See the note at #/definitions/_device.
+      device-name:
+        "$ref": "#/definitions/_device_name"
+
+      device:
+        "$ref": "#/definitions/_device_id"
+
+      driver:
+        "$ref": "#/definitions/_device_driver"
+
+      vendor-name:
+        "$ref": "#/definitions/_device_vendor_name"
+
+      vendor:
+        "$ref": "#/definitions/_device_vendor_id"
+
+    additionalProperties: false
+
+    # enforce at least one property
+    minProperties: 1
+
+  # HW requirements: single `disk` item
+  disk:
+    type: object
+
+    properties:
+      size:
+        anyOf:
+          - type: string
+          - type: integer
+
+      model-name:
+        type: string
+
+      driver:
+        "$ref": "#/definitions/_device_driver"
+
+      logical-sector-size:
+        anyOf:
+          - type: string
+          - type: integer
+
+      physical-sector-size:
+        anyOf:
+          - type: string
+          - type: integer
+
+    additionalProperties: false
+
+    # enforce at least one property - we don't care which one, but we don't want
+    # empty `disk`.
+    minProperties: 1
+
+  # HW requirements: `disk` block
+  disks:
+    type: array
+    items:
+      "$ref": "#/definitions/disk"
+
+  # HW requirements: single `gpu` item
+  gpu:
+    type: object
+
+    properties:
+      # TODO: copied from #/definitions/_device till the validator maturity gets resolved.
+      # See the note at #/definitions/_device.
+      device-name:
+        "$ref": "#/definitions/_device_name"
+
+      device:
+        "$ref": "#/definitions/_device_id"
+
+      driver:
+        "$ref": "#/definitions/_device_driver"
+
+      vendor-name:
+        "$ref": "#/definitions/_device_vendor_name"
+
+      vendor:
+        "$ref": "#/definitions/_device_vendor_id"
+
+    additionalProperties: false
+
+    # enforce at least one property - we don't care which one, but we don't want
+    # empty `gpu`.
+    minProperties: 1
+
+  hostname:
+    type: string
+
+  # HW requirements: single `location` item
+  location:
+    type: object
+
+    properties:
+      lab-controller:
+        type: string
+
+    additionalProperties: false
+
+    # enforce at least one property
+    minProperties: 1
+
+  memory:
+    anyOf:
+      - type: string
+      - type: integer
+
+  # HW requirements: single `network` item
+  network:
+    type: object
+
+    properties:
+      type:
+        type: string
+
+      # TODO: copied from #/definitions/_device till the validator maturity gets resolved.
+      # See the note at #/definitions/_device.
+      device-name:
+        "$ref": "#/definitions/_device_name"
+
+      device:
+        "$ref": "#/definitions/_device_id"
+
+      driver:
+        "$ref": "#/definitions/_device_driver"
+
+      vendor-name:
+        "$ref": "#/definitions/_device_vendor_name"
+
+      vendor:
+        "$ref": "#/definitions/_device_vendor_id"
+
+    additionalProperties: false
+
+    # enforce at least one property - we don't care which one, but we don't want
+    # empty `network`.
+    minProperties: 1
+
+  # HW requirements: `network` block
+  networks:
+    type: array
+    items:
+      "$ref": "#/definitions/network"
+
+  # HW requirements: single `system` item
+  system:
+    type: object
+
+    properties:
+      vendor:
+        "$ref": "#/definitions/_device_vendor_id"
+
+      vendor-name:
+        "$ref": "#/definitions/_device_vendor_name"
+
+      model:
+        anyOf:
+          - type: string
+          - type: integer
+
+      model-name:
+        type: string
+
+      numa-nodes:
+        anyOf:
+          - type: string
+          - type: integer
+
+      management-controller:
+        type: object
+
+        properties:
+          protocol:
+            type: string
+
+          # TODO: copied from #/definitions/_device till the validator maturity gets resolved.
+          # See the note at #/definitions/_device.
+          device-name:
+            "$ref": "#/definitions/_device_name"
+
+          device:
+            "$ref": "#/definitions/_device_id"
+
+          driver:
+            "$ref": "#/definitions/_device_driver"
+
+          vendor-name:
+            "$ref": "#/definitions/_device_vendor_name"
+
+          vendor:
+            "$ref": "#/definitions/_device_vendor_id"
+
+        additionalProperties: false
+        minProperties: 1
+
+    additionalProperties: false
+
+    # enforce at least one property
+    minProperties: 1
+
+  # HW requirements: `tpm` block
+  tpm:
+    type: object
+
+    properties:
+      version:
+        type: string
+
+    additionalProperties: false
+    minProperties: 1
+
+  # HW requirements: `zcrypt` block
+  zcrypt:
+    type: object
+
+    properties:
+      adapter:
+        type: string
+      mode:
+        type: string
+
+    additionalProperties: false
+    minProperties: 1
+
+  # HW requirements: `virtualization` block
+  virtualization:
+    type: object
+
+    properties:
+      is-virtualized:
+        type: boolean
+
+      is-supported:
+        type: boolean
+
+      hypervisor:
+        type: string
+
+    additionalProperties: false
+
+    # enforce at least one property - we don't care which one, but we don't want
+    # empty `boot`.
+    minProperties: 1
+
+  # Hw requirements `iommu` block
+  iommu:
+    type: object
+
+    properties:
+      is-supported:
+        type: boolean
+
+      model-name:
+        type: string
+
+    additionalProperties: false
+    minProperties: 1
+
+  # HW requirements: basic block
+  block:
+    type: object
+
+    properties:
+      # arch:
+      #   "$ref": "#/definitions/arch"
+
+      beaker:
+        "$ref": "#/definitions/beaker"
+
+      boot:
+        "$ref": "#/definitions/boot"
+
+      compatible:
+        "$ref": "#/definitions/compatible"
+
+      cpu:
+        "$ref": "#/definitions/cpu"
+
+      device:
+        "$ref": "#/definitions/device"
+
+      disk:
+        "$ref": "#/definitions/disks"
+
+      gpu:
+        "$ref": "#/definitions/gpu"
+
+      hostname:
+        "$ref": "#/definitions/hostname"
+
+      location:
+        "$ref": "#/definitions/location"
+
+      memory:
+        "$ref": "#/definitions/memory"
+
+      network:
+        "$ref": "#/definitions/networks"
+
+      system:
+        "$ref": "#/definitions/system"
+
+      tpm:
+        "$ref": "#/definitions/tpm"
+
+      zcrypt:
+        "$ref": "#/definitions/zcrypt"
+
+      virtualization:
+        "$ref": "#/definitions/virtualization"
+
+      iommu:
+        "$ref": "#/definitions/iommu"
+
+    additionalProperties: false
+
+    # enforce at least one property - we don't care which one, but we don't want
+    # empty `block`.
+    minProperties: 1
+
+  # HW requirements: conditions
+  and:
+    type: object
+    properties:
+      "and":
+        type: array
+        items:
+          oneOf:
+            - "$ref": "#/definitions/block"
+            - "$ref": "#/definitions/and"
+            - "$ref": "#/definitions/or"
+        minItems: 1
+
+    additionalProperties: false
+
+    required:
+      - "and"
+
+  or:
+    type: object
+    properties:
+      "or":
+        type: array
+        items:
+          oneOf:
+            - "$ref": "#/definitions/block"
+            - "$ref": "#/definitions/and"
+            - "$ref": "#/definitions/or"
+        minItems: 1
+
+    additionalProperties: false
+
+    required:
+      - "or"
+
+  hardware:
+    oneOf:
+      - "$ref": "#/definitions/block"
+      - "$ref": "#/definitions/and"
+      - "$ref": "#/definitions/or"

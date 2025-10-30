@@ -1,0 +1,58 @@
+---
+
+#
+# JSON Schema definition for `connect` provision plugin
+#
+# https://tmt.readthedocs.io/en/stable/spec/plans.html#connect
+#
+
+$id: /schemas/provision/connect
+$schema: https://json-schema.org/draft-07/schema
+
+type: object
+additionalProperties: false
+
+properties:
+
+  how:
+    type: string
+    enum:
+      - connect
+
+  name:
+    type: string
+
+  guest:
+    type: string
+
+  user:
+    type: string
+
+  become:
+    type: boolean
+
+  password:
+    type: string
+
+  role:
+    $ref: "/schemas/common#/definitions/role"
+
+  environment:
+    $ref: "/schemas/common#/definitions/environment"
+
+  key:
+    type: string
+
+  port:
+    type: integer
+    minimum: 0
+    maximum: 65535
+
+  soft-reboot:
+    type: string
+
+  hard-reboot:
+    type: string
+
+required:
+  - how

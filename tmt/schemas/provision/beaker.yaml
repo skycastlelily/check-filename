@@ -1,0 +1,80 @@
+---
+
+#
+# JSON Schema definition for `mrack` provision plugin
+#
+
+$id: /schemas/provision/mrack
+$schema: https://json-schema.org/draft-07/schema
+
+type: object
+additionalProperties: false
+
+properties:
+
+  how:
+    type: string
+    enum:
+      - beaker
+
+  name:
+    type: string
+
+  arch:
+    $ref: "/schemas/common#/definitions/arch"
+
+  image:
+    type: string
+
+  provision-timeout:
+    type: integer
+    minimum: 1
+
+  provision-tick:
+    type: integer
+    minimum: 1
+
+  hardware:
+    $ref: "/schemas/provision/hardware#/definitions/hardware"
+
+  kickstart:
+    $ref: "/schemas/provision/kickstart#/definitions/kickstart"
+
+  role:
+    $ref: "/schemas/common#/definitions/role"
+
+  environment:
+    $ref: "/schemas/common#/definitions/environment"
+
+  whiteboard:
+    type: string
+
+  beaker-job-owner:
+    type: string
+
+  key:
+    $ref: "/schemas/common#/definitions/one_or_more_strings"
+
+  public-key:
+    $ref: "/schemas/common#/definitions/one_or_more_strings"
+
+  beaker-job-group:
+    type: string
+
+  order:
+    $ref: "/schemas/core#/definitions/order"
+
+  bootc-registry-secret:
+    type: string
+
+  bootc-image-url:
+    type: string
+
+  bootc:
+    type: boolean
+
+  bootc-check-system-url:
+    type: string
+
+required:
+  - how

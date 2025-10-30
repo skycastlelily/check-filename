@@ -1,0 +1,511 @@
+---
+
+#
+# Common JSON Schema definitions
+#
+
+$id: /schemas/common
+$schema: https://json-schema.org/draft-07/schema
+
+definitions:
+  # context dimensions - the defined ones
+  arch:
+    type: string
+    enum:
+      - aarch64
+      - armhfp
+      - i386
+      - ppc64
+      - ppc64le
+      - s390x
+      - x86_64
+
+  distro:
+    type: string
+    patterns:
+      - ^fedora(-[0-9]+)?$
+      - ^centos(-stream)?(-[0-9]+(.[0-9]+)?)?$
+      - ^rhel(-[0-9]+(.[0-9]+)?)?$
+
+  trigger:
+    type: string
+    enum:
+      - build
+      - commit
+      - compose
+      - update
+
+  variant:
+    type: string
+    enum:
+      - Client
+      - Desktop
+      - Server
+      - Workstation
+      - Silverblue
+      - CoreOS
+
+  # common definition of an ansible execution method
+  ansible:
+    type: object
+    additionalProperties: false
+
+    properties:
+      how:
+        type: string
+        enum:
+          - ansible
+
+      extra-args:
+        type: string
+
+      name:
+        type: string
+
+      order:
+        $ref: "/schemas/core#/definitions/order"
+
+      playbook:
+        $ref: "/schemas/common#/definitions/one_or_more_strings"
+
+      summary:
+        $ref: "/schemas/core#/definitions/summary"
+
+      where:
+        $ref: "/schemas/common#/definitions/where"
+
+      when:
+        $ref: "/schemas/common#/definitions/when"
+
+    required:
+      - how
+
+  # List of all available require types
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#require
+  require_type:
+    type: string
+    enum:
+      - library
+      - file
+
+  # helper for specifying array of strings
+  array_of_strings:
+    type: array
+    items:
+      type: string
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#require
+  beakerlib_library:
+    allOf:
+      - $ref: "/schemas/common#/definitions/fmf_id_base"
+
+    additionalProperties: false
+
+    # NOTE: Because of old jsonschema package on RHEL-8, we cannot use
+    # `url: true` and inherit `url` attributes from parent schema. It
+    # seems like we have to repeat properties schemas here as well.
+    properties:
+      url:
+        type: string
+
+      ref:
+        type: string
+
+      path:
+        type: string
+
+      name:
+        type: string
+        pattern: "^/"
+
+      nick:
+        type: string
+
+      type:
+        $ref: "/schemas/common#/definitions/require_type"
+
+    required:
+      - type
+
+    # This would have been the easy way, understandable by newer jsonschema
+    # packages.
+    # url: true
+    # ref: true
+    # path: true
+    # name: true
+    # type: true
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#dist-git-source
+  dist-git-source:
+    type: boolean
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#dist-git-source
+  dist-git-type:
+    type: string
+    enum:
+      - centos
+      - fedora
+      - rhel
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#dist-git-source
+  dist-git-download-only:
+    type: boolean
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#dist-git-source
+  dist-git-install-builddeps:
+    type: boolean
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#dist-git-source
+  dist-git-require:
+    $ref: "/schemas/common#/definitions/one_or_more_strings"
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#duration
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#shell
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#script
+  duration:
+    type: string
+    pattern: "^([0-9*. ]+[smhd]? *)+$"
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#environment
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#environment
+  environment:
+    type: object
+
+    additionalProperties:
+      anyOf:
+        - type: string
+        - type: boolean
+        - type: number
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#context
+  # https://tmt.readthedocs.io/en/stable/spec/context.html#spec-context
+  context:
+    type: object
+
+    additionalProperties:
+      $ref: "#/definitions/one_or_more_strings"
+
+    properties:
+      arch:
+        oneOf:
+          - $ref: "#/definitions/arch"
+
+          - type: array
+            items:
+              $ref: "#/definitions/arch"
+
+      component:
+        $ref: "#/definitions/one_or_more_strings"
+
+      collection:
+        $ref: "#/definitions/one_or_more_strings"
+
+      distro:
+        oneOf:
+          - $ref: "#/definitions/distro"
+
+          - type: array
+            items:
+              $ref: "#/definitions/distro"
+
+      module:
+        $ref: "#/definitions/one_or_more_strings"
+
+      trigger:
+        oneOf:
+          - $ref: "#/definitions/trigger"
+
+          - type: array
+            items:
+              $ref: "#/definitions/trigger"
+
+      variant:
+        oneOf:
+          - $ref: "#/definitions/variant"
+
+          - type: array
+            items:
+              $ref: "#/definitions/variant"
+
+  # https://fmf.readthedocs.io/en/stable/concept.html#identifiers
+  fmf_id:
+    allOf:
+      - $ref: "/schemas/common#/definitions/fmf_id_base"
+
+    additionalProperties: false
+
+    # NOTE: Because of old jsonschema package on RHEL-8, we cannot use
+    # `url: true` and inherit `url` attributes from parent schema. It
+    # seems like we have to repeat properties schemas here as well.
+    properties:
+      url:
+        type: string
+
+      ref:
+        type: string
+
+      path:
+        type: string
+
+      name:
+        type: string
+        pattern: "^/"
+
+    # This would have been the easy way, understandable by newer jsonschema
+    # packages.
+    #
+    # url: true
+    # ref: true
+    # path: true
+    # name: true
+
+  # helper used by beakerlib_library and fmf_id
+  #
+  # NOTE: when changing the following properties, thanks to old jsonschema tmt
+  # depends on in RHEL-8 lands, update also their copies in `fmf_id` and
+  # `beaker_library` definitions.
+  fmf_id_base:
+    type: object
+    minProperties: 1
+    properties:
+      url:
+        type: string
+
+      ref:
+        type: string
+
+      path:
+        type: string
+
+      name:
+        type: string
+        pattern: "^/"
+
+  require_file:
+    type: object
+    minProperties: 1
+    properties:
+      pattern:
+        anyOf:
+          - type: string
+          - $ref: "/schemas/common#/definitions/array_of_strings"
+
+      type:
+        $ref: "/schemas/common#/definitions/require_type"
+
+    required:
+      - type
+      - pattern
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#link
+  # helper for one link
+  link:
+    oneOf:
+      - $ref: "/schemas/common#/definitions/link_relation"
+      - $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+  # helper for specifying one link_relation with optional note
+  link_relation:
+    type: object
+
+    additionalProperties: false
+
+    properties:
+      verifies:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      verified-by:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      implements:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      implemented-by:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      documents:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      documented-by:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      blocks:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      blocked-by:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      duplicates:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      duplicated-by:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      parent:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      child:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      relates:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      test-script:
+        $ref: "/schemas/common#/definitions/url_path_or_fmf_id"
+
+      note:
+        type: string
+
+    oneOf:
+      - required:
+          - verifies
+      - required:
+          - verified-by
+      - required:
+          - implements
+      - required:
+          - implemented-by
+      - required:
+          - documents
+      - required:
+          - documented-by
+      - required:
+          - blocks
+      - required:
+          - blocked-by
+      - required:
+          - duplicates
+      - required:
+          - duplicated-by
+      - required:
+          - parent
+      - required:
+          - child
+      - required:
+          - relates
+      - required:
+          - test-script
+
+  # helper for specifying an object with string properties
+  object_with_string_properties:
+    type: object
+
+    additionalProperties:
+      type: string
+
+  # helper for specifying a string or an array of strings
+  one_or_more_strings:
+    oneOf:
+      - type: string
+
+      - type: array
+        items:
+          type: string
+
+  # In multihost scenarios, guests can be given roles
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#multihost
+  role:
+    type: string
+
+  # common definition of a shell execution method
+  shell:
+    type: object
+    additionalProperties: false
+
+    properties:
+      how:
+        type: string
+        enum:
+          - shell
+
+      name:
+        type: string
+
+      url:
+        type: string
+
+      ref:
+        type: string
+
+      order:
+        $ref: "/schemas/core#/definitions/order"
+
+      script:
+        $ref: "/schemas/common#/definitions/one_or_more_strings"
+
+      summary:
+        $ref: "/schemas/core#/definitions/summary"
+
+      where:
+        $ref: "/schemas/common#/definitions/where"
+
+      when:
+        $ref: "/schemas/common#/definitions/when"
+
+    required:
+      - how
+
+  # helper
+  url:
+    type: string
+    pattern: "^https?://"
+
+  # a url, path or fmf_id
+  url_path_or_fmf_id:
+    oneOf:
+      - $ref: "/schemas/common#/definitions/url"
+
+      - type: string
+        pattern: "^/"
+
+      - $ref: "/schemas/common#/definitions/fmf_id"
+
+  # In multihost scenarios, some steps can be executed on some guests only.
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#multihost
+  where:
+    $ref: "/schemas/common#/definitions/one_or_more_strings"
+
+  # If used, run step config only if any of the rules matches
+  when:
+    $ref: "/schemas/common#/definitions/one_or_more_strings"
+
+  result_outcome:
+    type: string
+    enum:
+      - pass
+      - fail
+      - info
+      - warn
+      - error
+      - skip
+      - pending
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#result
+  result_interpret:
+    type: string
+
+    enum:
+      - respect
+      - xfail
+      - pass
+      - info
+      - warn
+      - error
+      - fail
+      - custom
+      - restraint
+
+  result_note:
+    type: array
+    items:
+      type: string
+
+  result_log:
+    type: array
+    items:
+      type: string
+
+  timestamp:
+    type: string
+    # yamllint disable-line rule:line-length
+    pattern: "^\\d{2,}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d+(?:(?:\\+\\d{2}:\\d{2})|Z)$"

@@ -1,0 +1,41 @@
+---
+
+#
+# JSON Schema definition for `html` report plugin
+#
+# https://tmt.readthedocs.io/en/stable/spec/plans.html#html
+#
+
+$id: /schemas/report/html
+$schema: https://json-schema.org/draft-07/schema
+
+type: object
+additionalProperties: false
+
+properties:
+
+  how:
+    type: string
+    enum:
+      - html
+
+  name:
+    type: string
+
+  file:
+    type: string
+
+  open:
+    type: boolean
+
+  absolute-paths:
+    type: boolean
+
+  display-guest:
+    type: boolean
+
+  when:
+    $ref: "/schemas/common#/definitions/when"
+
+required:
+  - how

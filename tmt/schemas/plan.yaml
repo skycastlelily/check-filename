@@ -1,0 +1,183 @@
+---
+
+#
+# JSON Schema definition for tmt `Plans`
+#
+# https://tmt.readthedocs.io/en/stable/spec/plans.html
+#
+
+$id: /schemas/plan
+$schema: https://json-schema.org/draft-07/schema
+
+type: object
+additionalProperties: false
+
+properties:
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#adjust
+  adjust:
+    $ref: "/schemas/core#/definitions/adjust"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#author
+  author:
+    $ref: "/schemas/core#/definitions/author"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#contact
+  contact:
+    $ref: "/schemas/core#/definitions/contact"
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#context
+  # https://tmt.readthedocs.io/en/stable/spec/context.html#spec-context
+  context:
+    $ref: "/schemas/common#/definitions/context"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#description
+  description:
+    $ref: "/schemas/core#/definitions/description"
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#spec-plans-discover
+  #
+  # NOTE: the `discover` schema will be extended dynamically to support all
+  # discover plugins known to tmt in runtime. See tmt.utils.load_schema_store
+  # for details.
+  discover: true
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#enabled
+  enabled:
+    $ref: "/schemas/core#/definitions/enabled"
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#environment
+  environment:
+    $ref: "/schemas/common#/definitions/environment"
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#environment-file
+  environment-file:
+    $ref: "/schemas/common#/definitions/array_of_strings"
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#execute
+  #
+  # NOTE: the `execute` schema will be extended dynamically to support all
+  # execute plugins known to tmt in runtime. See tmt.utils.load_schema_store
+  # for details.
+  execute: true
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#finish
+  #
+  # NOTE: the `finish` schema will be extended dynamically to support all
+  # finish plugins known to tmt in runtime. See tmt.utils.load_schema_store
+  # for details.
+  finish: true
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#cleanup
+  #
+  # NOTE: the `cleanup` schema will be extended dynamically to support all
+  # cleanup plugins known to tmt in runtime. See tmt.utils.load_schema_store
+  # for details.
+  cleanup: true
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#id
+  id:
+    $ref: "/schemas/core#/definitions/id"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#link
+  link:
+    $ref: "/schemas/core#/definitions/link"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#order
+  order:
+    $ref: "/schemas/core#/definitions/order"
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#prepare
+  #
+  # NOTE: the `prepare` schema will be extended dynamically to support all
+  # prepare plugins known to tmt in runtime. See tmt.utils.load_schema_store
+  # for details.
+  prepare: true
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#provision
+  #
+  # NOTE: the `provision` schema will be extended dynamically to support all
+  # provision plugins known to tmt in runtime. See tmt.utils.load_schema_store
+  # for details.
+  provision: true
+
+  # https://tmt.readthedocs.io/en/stable/spec/plans.html#report
+  #
+  # NOTE: the `report` schema will be extended dynamically to support all
+  # report plugins known to tmt in runtime. See tmt.utils.load_schema_store
+  # for details.
+  report: true
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#summary
+  summary:
+    $ref: "/schemas/core#/definitions/summary"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#tag
+  tag:
+    $ref: "/schemas/core#/definitions/tag"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#tier
+  tier:
+    $ref: "/schemas/core#/definitions/tier"
+
+  plan:
+    type: object
+    additionalProperties: false
+
+    properties:
+      import:
+        allOf:
+          - $ref: "/schemas/common#/definitions/fmf_id_base"
+
+        additionalProperties: false
+
+        # NOTE: Because of old jsonschema package on RHEL-8, we cannot use
+        # `url: true` and inherit `url` attributes from parent schema. It
+        # seems like we have to repeat properties schemas here as well.
+        properties:
+          url:
+            # https://github.com/teemtee/tmt/issues/1258
+            type: string
+
+          ref:
+            type: string
+
+          path:
+            type: string
+
+          name:
+            type: string
+            format: regex
+
+          importing:
+            type: string
+            enum:
+              - replace
+              - become-parent
+
+          scope:
+            type: string
+            enum:
+              - first-plan-only
+              - single-plan-only
+              - all-plans
+
+          inherit-context:
+            type: boolean
+
+          inherit-environment:
+            type: boolean
+
+        required:
+          - url
+          - name
+
+oneOf:
+  - required:
+      - execute
+  - required:
+      - plan
+
+# User-defined metadata
+patternProperties:
+  ^extra-: {}

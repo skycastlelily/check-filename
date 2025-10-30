@@ -1,0 +1,25 @@
+---
+
+# linter:
+#   outcome:
+#     skip:
+#     pass:
+#     fail:
+#     warn:
+#     fixed:
+
+linter:
+  outcome: {}
+
+# restructuredtext-text:
+
+# restructuredtext-literal:
+# restructuredtext-emphasis:
+# restructuredtext-strong:
+
+# restructuredtext-literalblock:
+# restructuredtext-literalblock-yaml:
+# restructuredtext-literalblock-shell:
+
+# restructuredtext-admonition-note:
+# restructuredtext-admonition-warning:

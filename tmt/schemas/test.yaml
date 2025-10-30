@@ -1,0 +1,188 @@
+---
+
+#
+# JSON Schema definition for tmt `Tests`
+#
+# https://tmt.readthedocs.io/en/stable/spec/tests.html
+#
+
+$id: /schemas/test
+$schema: https://json-schema.org/draft-07/schema
+
+type: object
+additionalProperties: false
+
+properties:
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#adjust
+  adjust:
+    $ref: "/schemas/core#/definitions/adjust"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#author
+  author:
+    $ref: "/schemas/core#/definitions/author"
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#component
+  component:
+    $ref: "/schemas/common#/definitions/one_or_more_strings"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#contact
+  contact:
+    $ref: "/schemas/core#/definitions/contact"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#description
+  description:
+    $ref: "/schemas/core#/definitions/description"
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#duration
+  duration:
+    $ref: "/schemas/common#/definitions/duration"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#enabled
+  enabled:
+    $ref: "/schemas/core#/definitions/enabled"
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#environment
+  environment:
+    $ref: "/schemas/common#/definitions/environment"
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#framework
+  framework:
+    type: string
+
+    enum:
+      - beakerlib
+      - shell
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#check
+  check:
+    anyOf:
+      - type: string
+      - $ref: "#/definitions/check"
+      - type: array
+        items:
+          anyOf:
+            - type: string
+            - $ref: "#/definitions/check"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#id
+  id:
+    $ref: "/schemas/core#/definitions/id"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#link
+  link:
+    $ref: "/schemas/core#/definitions/link"
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#manual
+  manual:
+    type: boolean
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#tty
+  tty:
+    type: boolean
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#order
+  order:
+    $ref: "/schemas/core#/definitions/order"
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#path
+  path:
+    type: string
+    pattern: "^/"
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#recommend
+  recommend:
+    $ref: "/schemas/common#/definitions/one_or_more_strings"
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#require
+  require:
+    anyOf:
+      - type: string
+      - $ref: "/schemas/common#/definitions/beakerlib_library"
+      - $ref: "/schemas/common#/definitions/require_file"
+      - type: array
+        items:
+          anyOf:
+            - type: string
+            - $ref: "/schemas/common#/definitions/beakerlib_library"
+            - $ref: "/schemas/common#/definitions/require_file"
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#restart
+  restart-on-exit-code:
+    anyOf:
+      - type: integer
+      - type: array
+        items:
+          type: integer
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#restart
+  restart-max-count:
+    type: integer
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#restart
+  restart-with-reboot:
+    type: boolean
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#result
+  result:
+    $ref: "/schemas/common#/definitions/result_interpret"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#summary
+  summary:
+    $ref: "/schemas/core#/definitions/summary"
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#tag
+  tag:
+    $ref: "/schemas/core#/definitions/tag"
+
+  # https://tmt.readthedocs.io/en/stable/spec/tests.html#test
+  test:
+    type: string
+
+  # https://tmt.readthedocs.io/en/stable/spec/core.html#tier
+  tier:
+    $ref: "/schemas/core#/definitions/tier"
+
+# User-defined metadata
+patternProperties:
+  ^extra-: {}
+
+required:
+  - test
+
+definitions:
+  check:
+    type: object
+    properties:
+      how:
+        type: string
+      enabled:
+        type: boolean
+      result:
+        type: string
+        enum:
+          - respect
+          - xfail
+          - info
+      ignore-pattern:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+      failure-pattern:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+      dmesg:
+        type: boolean
+      unit:
+        type: string
+      identifier:
+        type: string
+      priority:
+        type: string
+    required:
+      - how
